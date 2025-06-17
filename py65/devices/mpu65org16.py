@@ -21,7 +21,7 @@ class MPU(mpu6502.MPU):
 
     def __init__(self, *args, **kwargs):
         mpu6502.MPU.__init__(self, *args, **kwargs)
-        self.name = '65Org16'
+        self.name = "65Org16"
         self.waiting = False
         self.IrqTo = (1 << self.ADDR_WIDTH) - 2
         self.ResetTo = (1 << self.ADDR_WIDTH) - 4
@@ -43,5 +43,7 @@ class MPU(mpu6502.MPU):
     disassemble = mpu6502.MPU.disassemble[:]
 
     def reprformat(self):
-        return ("%s   PC     AC   XR   YR   SP  NV---------BDIZC\n" +
-                "%s: %08x %04x %04x %04x %04x %s")
+        return (
+            "%s   PC     AC   XR   YR   SP  NV---------BDIZC\n"
+            + "%s: %08x %04x %04x %04x %04x %s"
+        )

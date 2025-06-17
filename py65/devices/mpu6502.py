@@ -4,9 +4,9 @@ from py65.utils.devices import make_instruction_decorator
 
 class MPU:
     # vectors
-    RESET = 0xfffc
-    NMI = 0xfffa
-    IRQ = 0xfffe
+    RESET = 0xFFFC
+    NMI = 0xFFFA
+    IRQ = 0xFFFE
 
     # processor flags
     NEGATIVE = 128
@@ -25,10 +25,10 @@ class MPU:
 
     def __init__(self, memory=None, pc=0x0000):
         # config
-        self.name = '6502'
-        self.byteMask = ((1 << self.BYTE_WIDTH) - 1)
-        self.addrMask = ((1 << self.ADDR_WIDTH) - 1)
-        self.addrHighMask = (self.byteMask << self.BYTE_WIDTH)
+        self.name = "6502"
+        self.byteMask = (1 << self.BYTE_WIDTH) - 1
+        self.addrMask = (1 << self.ADDR_WIDTH) - 1
+        self.addrHighMask = self.byteMask << self.BYTE_WIDTH
         self.spBase = 1 << self.BYTE_WIDTH
 
         # vm status
@@ -39,21 +39,28 @@ class MPU:
         if memory is None:
             memory = 0x10000 * [0x00]
         self.memory = memory
-        self.start_pc = pc # if None, reset vector is used
+        self.start_pc = pc  # if None, reset vector is used
 
         # init
         self.reset()
 
     def reprformat(self):
-        return ("%s PC  AC XR YR SP NV-BDIZC\n"
-                "%s: %04x %02x %02x %02x %02x %s")
+        return "%s PC  AC XR YR SP NV-BDIZC\n" "%s: %04x %02x %02x %02x %02x %s"
 
     def __repr__(self):
-        flags = itoa(self.p, 2).rjust(self.BYTE_WIDTH, '0')
-        indent = ' ' * (len(self.name) + 2)
+        flags = itoa(self.p, 2).rjust(self.BYTE_WIDTH, "0")
+        indent = " " * (len(self.name) + 2)
 
-        return self.reprformat() % (indent, self.name, self.pc, self.a,
-                                    self.x, self.y, self.sp, flags)
+        return self.reprformat() % (
+            indent,
+            self.name,
+            self.pc,
+            self.a,
+            self.x,
+            self.y,
+            self.sp,
+            flags,
+        )
 
     def step(self):
         instructCode = self.memory[self.pc]
@@ -322,33 +329,36 @@ class MPU:
             decimalcarry = 0
             adjust0 = 0
             adjust1 = 0
-            nibble0 = (data & 0xf) + (self.a & 0xf) + (self.p & self.CARRY)
+            nibble0 = (data & 0xF) + (self.a & 0xF) + (self.p & self.CARRY)
             if nibble0 > 9:
                 adjust0 = 6
                 halfcarry = 1
-            nibble1 = ((data >> 4) & 0xf) + ((self.a >> 4) & 0xf) + halfcarry
+            nibble1 = ((data >> 4) & 0xF) + ((self.a >> 4) & 0xF) + halfcarry
             if nibble1 > 9:
                 adjust1 = 6
                 decimalcarry = 1
 
             # the ALU outputs are not decimally adjusted
-            nibble0 = nibble0 & 0xf
-            nibble1 = nibble1 & 0xf
+            nibble0 = nibble0 & 0xF
+            nibble1 = nibble1 & 0xF
             aluresult = (nibble1 << 4) + nibble0
 
             # the final A contents will be decimally adjusted
-            nibble0 = (nibble0 + adjust0) & 0xf
-            nibble1 = (nibble1 + adjust1) & 0xf
+            nibble0 = (nibble0 + adjust0) & 0xF
+            nibble1 = (nibble1 + adjust1) & 0xF
+            final = (nibble1 << 4) + nibble0
             self.p &= ~(self.CARRY | self.OVERFLOW | self.NEGATIVE | self.ZERO)
-            if aluresult == 0:
+
+            if final == 0:
                 self.p |= self.ZERO
-            else:
-                self.p |= aluresult & self.NEGATIVE
+            if aluresult & 0x80:
+                self.p |= self.NEGATIVE
             if decimalcarry == 1:
                 self.p |= self.CARRY
             if (~(self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
                 self.p |= self.OVERFLOW
-            self.a = (nibble1 << 4) + nibble0
+
+            self.a = final
         else:
             if self.p & self.CARRY:
                 tmp = 1
@@ -419,25 +429,24 @@ class MPU:
             adjust0 = 0
             adjust1 = 0
 
-            nibble0 = (self.a & 0xf) + (~data & 0xf) + (self.p & self.CARRY)
-            if nibble0 <= 0xf:
+            nibble0 = (self.a & 0xF) + (~data & 0xF) + (self.p & self.CARRY)
+            if nibble0 <= 0xF:
                 halfcarry = 0
                 adjust0 = 10
-            nibble1 = ((self.a >> 4) & 0xf) + ((~data >> 4) & 0xf) + halfcarry
-            if nibble1 <= 0xf:
+            nibble1 = ((self.a >> 4) & 0xF) + ((~data >> 4) & 0xF) + halfcarry
+            if nibble1 <= 0xF:
                 adjust1 = 10 << 4
 
             # the ALU outputs are not decimally adjusted
-            aluresult = self.a + (~data & self.byteMask) + \
-                (self.p & self.CARRY)
+            aluresult = self.a + (~data & self.byteMask) + (self.p & self.CARRY)
 
             if aluresult > self.byteMask:
                 decimalcarry = 1
             aluresult &= self.byteMask
 
             # but the final result will be adjusted
-            nibble0 = (aluresult + adjust0) & 0xf
-            nibble1 = ((aluresult + adjust1) >> 4) & 0xf
+            nibble0 = (aluresult + adjust0) & 0xF
+            nibble1 = ((aluresult + adjust1) >> 4) & 0xF
 
             self.p &= ~(self.CARRY | self.ZERO | self.NEGATIVE | self.OVERFLOW)
             if aluresult == 0:
@@ -520,10 +529,11 @@ class MPU:
     instruct = [inst_not_implemented] * 256
     cycletime = [0] * 256
     extracycles = [0] * 256
-    disassemble = [('???', 'imp')] * 256
+    disassemble = [("???", "imp")] * 256
 
-    instruction = make_instruction_decorator(instruct, disassemble,
-                                             cycletime, extracycles)
+    instruction = make_instruction_decorator(
+        instruct, disassemble, cycletime, extracycles
+    )
 
     @instruction(name="BRK", mode="imp", cycles=7)
     def inst_0x00(self):
@@ -640,7 +650,7 @@ class MPU:
 
     @instruction(name="PLP", mode="imp", cycles=4)
     def inst_0x28(self):
-        self.p = (self.stPop() | self.BREAK | self.UNUSED)
+        self.p = self.stPop() | self.BREAK | self.UNUSED
 
     @instruction(name="AND", mode="imm", cycles=2)
     def inst_0x29(self):
@@ -706,7 +716,7 @@ class MPU:
 
     @instruction(name="RTI", mode="imp", cycles=6)
     def inst_0x40(self):
-        self.p = (self.stPop() | self.BREAK | self.UNUSED)
+        self.p = self.stPop() | self.BREAK | self.UNUSED
         self.pc = self.stPopWord()
 
     @instruction(name="EOR", mode="inx", cycles=6)

@@ -2,8 +2,7 @@ import re
 
 
 class AddressParser(object):
-    """Parse user input into addresses or ranges of addresses.
-    """
+    """Parse user input into addresses or ranges of addresses."""
 
     def __init__(self, maxwidth=16, radix=16, labels={}):
         """Maxwidth is the maximum width of an address in bits.
@@ -28,31 +27,28 @@ class AddressParser(object):
     maxwidth = property(_get_maxwidth, _set_maxwidth)
 
     def address_for(self, label, default=None):
-        """Given a label, return the corresponding address or a default.
-        """
+        """Given a label, return the corresponding address or a default."""
         return self.labels.get(label, default)
 
     def label_for(self, address, default=None):
-        """Given an address, return the corresponding label or a default.
-        """
+        """Given an address, return the corresponding label or a default."""
         for label, label_address in self.labels.items():
             if label_address == address:
                 return label
         return default
 
     def number(self, num):
-        """Parse a string containing a label or number into an address.
-        """
+        """Parse a string containing a label or number into an address."""
         try:
-            if num.startswith('$'):
+            if num.startswith("$"):
                 # hexadecimal
                 return self._constrain(int(num[1:], 16))
 
-            elif num.startswith('+'):
+            elif num.startswith("+"):
                 # decimal
                 return self._constrain(int(num[1:], 10))
 
-            elif num.startswith('%'):
+            elif num.startswith("%"):
                 # binary
                 return self._constrain(int(num[1:], 2))
 
@@ -61,7 +57,7 @@ class AddressParser(object):
                 return self.labels[num]
 
             else:
-                matches = re.match(r'^([^\s+-]+)\s*([+\-])\s*([$+%]?\d+)$', num)
+                matches = re.match(r"^([^\s+-]+)\s*([+\-])\s*([$+%]?\d+)$", num)
                 if matches:
                     label, sign, offset = matches.groups()
 
@@ -71,7 +67,7 @@ class AddressParser(object):
                     base = self.labels[label]
                     offset = self.number(offset)
 
-                    if sign == '+':
+                    if sign == "+":
                         address = base + offset
                     else:
                         address = base - offset
@@ -88,7 +84,7 @@ class AddressParser(object):
         """Parse a string containing an address or a range of addresses
         into a tuple of (start address, end address)
         """
-        matches = re.match(r'^([^:,]+)\s*[:,]+\s*([^:,]+)$', addresses)
+        matches = re.match(r"^([^:,]+)\s*[:,]+\s*([^:,]+)$", addresses)
         if matches:
             start, end = map(self.number, matches.groups(0))
         else:
@@ -99,7 +95,7 @@ class AddressParser(object):
         return (start, end)
 
     def _constrain(self, address):
-        '''Raises OverflowError if the address is illegal'''
+        """Raises OverflowError if the address is illegal"""
         if address < 0 or address > self._maxaddr:
             raise OverflowError(address)
         return address

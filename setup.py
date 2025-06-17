@@ -1,4 +1,4 @@
-__version__ = '1.3.0.dev0'
+__version__ = "1.3.0.dev0"
 
 import sys
 
@@ -7,51 +7,51 @@ PY3 = py_version[0] == 3
 
 if PY3:
     if py_version < (3, 4):
-        raise RuntimeError('On Python 3, Py65 requires Python 3.4 or later')
+        raise RuntimeError("On Python 3, Py65 requires Python 3.4 or later")
 else:
     if py_version < (2, 7):
-        raise RuntimeError('On Python 2, Py65 requires Python 2.7 or later')
+        raise RuntimeError("On Python 2, Py65 requires Python 2.7 or later")
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 DESC = """\
 Simulate 6502-based microcomputer systems in Python."""
 
 CLASSIFIERS = [
-    'Development Status :: 3 - Alpha',
-    'Environment :: Console',
-    'Intended Audience :: Developers',
-    'Natural Language :: English',
-    'Operating System :: POSIX',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8',
-    'Programming Language :: Python :: 3.9',
-    'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',
-    'Programming Language :: Assembly',
-    'Topic :: Software Development :: Assemblers',
-    'Topic :: Software Development :: Disassemblers',
-    'Topic :: Software Development :: Debuggers',
-    'Topic :: Software Development :: Embedded Systems',
-    'Topic :: Software Development :: Interpreters',
-    'Topic :: System :: Emulators',
-    'Topic :: System :: Hardware'
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: POSIX",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 2",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.4",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Assembly",
+    "Topic :: Software Development :: Assemblers",
+    "Topic :: Software Development :: Disassemblers",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Embedded Systems",
+    "Topic :: Software Development :: Interpreters",
+    "Topic :: System :: Emulators",
+    "Topic :: System :: Hardware",
 ]
 
 setup(
-    name='py65',
+    name="py65",
     version=__version__,
-    license='License :: OSI Approved :: BSD License',
-    url='https://github.com/mnaberez/py65',
-    description='6502 microprocessor simulation package',
+    license="License :: OSI Approved :: BSD License",
+    url="https://github.com/mnaberez/py65",
+    description="6502 microprocessor simulation package",
     long_description=DESC,
     classifiers=CLASSIFIERS,
     author="Mike Naberezny",
@@ -66,8 +66,8 @@ setup(
     zip_safe=False,
     test_suite="py65.tests",
     entry_points={
-        'console_scripts': [
-            'py65mon = py65.monitor:main',
+        "console_scripts": [
+            "py65mon = py65.monitor:main",
         ],
     },
 )

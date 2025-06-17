@@ -3,10 +3,10 @@ from collections import defaultdict
 
 class ObservableMemory:
     def __init__(self, subject=None, addrWidth=16):
-        self.physMask = 0xffff
+        self.physMask = 0xFFFF
         if addrWidth > 16:
             # even with 32-bit address space, model only 256k memory
-            self.physMask = 0x3ffff
+            self.physMask = 0x3FFFF
 
         if subject is None:
             subject = (self.physMask + 1) * [0x00]
@@ -35,7 +35,7 @@ class ObservableMemory:
     def __getitem__(self, address):
         if isinstance(address, slice):
             r = range(*address.indices(self.physMask + 1))
-            return [ self[n] for n in r ]
+            return [self[n] for n in r]
 
         address &= self.physMask
         callbacks = self._read_subscribers[address]
@@ -70,4 +70,4 @@ class ObservableMemory:
 
     def write(self, start_address, bytes):
         start_address &= self.physMask
-        self._subject[start_address:start_address + len(bytes)] = bytes
+        self._subject[start_address : start_address + len(bytes)] = bytes

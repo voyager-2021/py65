@@ -22,29 +22,36 @@ import shlex
 import sys
 import traceback
 
-from py65.devices.mpu6502 import MPU as NMOS6502
+from py65.assembler import Assembler
 from py65.devices.mpu65c02 import MPU as CMOS65C02
 from py65.devices.mpu65org16 import MPU as V65Org16
+from py65.devices.mpu6502 import MPU as NMOS6502
 from py65.disassembler import Disassembler
-from py65.assembler import Assembler
-from py65.utils.addressing import AddressParser
-from py65.utils import console
-from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
+from py65.utils import console
+from py65.utils.addressing import AddressParser
+from py65.utils.conversions import itoa
 
 try:
     from urllib2 import urlopen
-except ImportError: # Python 3
+except ImportError:  # Python 3
     from urllib.request import urlopen
+
 
 class Monitor(cmd.Cmd):
 
-    Microprocessors = {'6502': NMOS6502, '65C02': CMOS65C02,
-                       '65Org16': V65Org16}
+    Microprocessors = {"6502": NMOS6502, "65C02": CMOS65C02, "65Org16": V65Org16}
 
-    def __init__(self, argv=None, stdin=None, stdout=None,
-                       mpu_type=NMOS6502, memory=None,
-                       putc_addr=0xF001, getc_addr=0xF004):
+    def __init__(
+        self,
+        argv=None,
+        stdin=None,
+        stdout=None,
+        mpu_type=NMOS6502,
+        memory=None,
+        putc_addr=0xF001,
+        getc_addr=0xF004,
+    ):
         self.mpu_type = mpu_type
         self.memory = memory
         self.putc_addr = putc_addr
@@ -87,8 +94,9 @@ class Monitor(cmd.Cmd):
                 self.do_load("%r top" % rom)
                 physMask = self._mpu.memory.physMask
                 reset = self._mpu.RESET & physMask
-                dest = self._mpu.memory[reset] + \
-                    (self._mpu.memory[reset + 1] << self.byteWidth)
+                dest = self._mpu.memory[reset] + (
+                    self._mpu.memory[reset + 1] << self.byteWidth
+                )
                 self.do_goto("$%x" % dest)
         except:
             # Restore input mode on any exception and then rethrow the
@@ -107,11 +115,10 @@ class Monitor(cmd.Cmd):
         except:
             pass
 
-
     def _parse_args(self, argv):
         try:
-            shortopts = 'hi:o:m:l:r:g:'
-            longopts = ['help', 'mpu=', 'input=', 'output=', 'load=', 'rom=', 'goto=']
+            shortopts = "hi:o:m:l:r:g:"
+            longopts = ["help", "mpu=", "input=", "output=", "load=", "rom=", "goto="]
             options, args = getopt.getopt(argv[1:], shortopts, longopts)
         except getopt.GetoptError as exc:
             self._output(exc.args[0])
@@ -121,18 +128,18 @@ class Monitor(cmd.Cmd):
         load, rom, goto = None, None, None
 
         for opt, value in options:
-            if opt in ('-i', '--input'):
+            if opt in ("-i", "--input"):
                 self.getc_addr = int(value, 16)
 
-            if opt in ('-o', '--output'):
+            if opt in ("-o", "--output"):
                 self.putc_addr = int(value, 16)
 
-            if opt in ('-m', '--mpu'):
+            if opt in ("-m", "--mpu"):
                 mpu_type = self._get_mpu(value)
                 if mpu_type is None:
                     mpus = sorted(self.Microprocessors.keys())
                     msg = "Fatal: no such MPU. Available MPUs: %s"
-                    self._output(msg % ', '.join(mpus))
+                    self._output(msg % ", ".join(mpus))
                     sys.exit(1)
                 self.mpu_type = mpu_type
 
@@ -140,13 +147,13 @@ class Monitor(cmd.Cmd):
                 self._usage()
                 self._exit(0)
 
-            if opt in ('-l', '--load'):
+            if opt in ("-l", "--load"):
                 load = value
 
-            if opt in ('-r', '--rom'):
+            if opt in ("-r", "--rom"):
                 rom = value
 
-            if opt in ('-g', '--goto'):
+            if opt in ("-g", "--goto"):
                 goto = value
 
         return load, rom, goto
@@ -164,7 +171,7 @@ class Monitor(cmd.Cmd):
         except KeyboardInterrupt:
             self._output("Interrupt")
         except Exception:
-            error = ''.join(traceback.format_exception(*sys.exc_info()))
+            error = "".join(traceback.format_exception(*sys.exc_info()))
             self._output(error)
 
         if not line.startswith("quit"):
@@ -190,31 +197,33 @@ class Monitor(cmd.Cmd):
         self._assembler = Assembler(self._mpu, self._address_parser)
 
     def _add_shortcuts(self):
-        self._shortcuts = {'EOF':  'quit',
-                           '~':    'tilde',
-                           'a':    'assemble',
-                           'ab':   'add_breakpoint',
-                           'al':   'add_label',
-                           'd':    'disassemble',
-                           'db':   'delete_breakpoint',
-                           'dl':   'delete_label',
-                           'exit': 'quit',
-                           'f':    'fill',
-                           '>':    'fill',
-                           'g':    'goto',
-                           'h':    'help',
-                           '?':    'help',
-                           'l':    'load',
-                           'm':    'mem',
-                           'q':    'quit',
-                           'r':    'registers',
-                           'ret':  'return',
-                           'rad':  'radix',
-                           's':    'save',
-                           'shb':  'show_breakpoints',
-                           'shl':  'show_labels',
-                           'x':    'quit',
-                           'z':    'step'}
+        self._shortcuts = {
+            "EOF": "quit",
+            "~": "tilde",
+            "a": "assemble",
+            "ab": "add_breakpoint",
+            "al": "add_label",
+            "d": "disassemble",
+            "db": "delete_breakpoint",
+            "dl": "delete_label",
+            "exit": "quit",
+            "f": "fill",
+            ">": "fill",
+            "g": "goto",
+            "h": "help",
+            "?": "help",
+            "l": "load",
+            "m": "mem",
+            "q": "quit",
+            "r": "registers",
+            "ret": "return",
+            "rad": "radix",
+            "s": "save",
+            "shb": "show_breakpoints",
+            "shl": "show_labels",
+            "x": "quit",
+            "z": "step",
+        }
 
     def _preprocess_line(self, line):
         # line comments
@@ -222,16 +231,16 @@ class Monitor(cmd.Cmd):
         for pos, char in enumerate(line):
             if char in ('"', "'"):
                 quoted = not quoted
-            if (not quoted) and (char == ';'):
+            if (not quoted) and (char == ";"):
                 line = line[:pos]
                 break
 
         # whitespace & leading dots
-        line = line.strip(' \t').lstrip('.')
+        line = line.strip(" \t").lstrip(".")
 
         # special case for vice compatibility
-        if line.startswith('~'):
-            line = self._shortcuts['~'] + ' ' + line[1:]
+        if line.startswith("~"):
+            line = self._shortcuts["~"] + " " + line[1:]
 
         # command shortcuts
         for shortcut, command in self._shortcuts.items():
@@ -239,7 +248,7 @@ class Monitor(cmd.Cmd):
                 line = command
                 break
 
-            pattern = r'^%s\s+' % re.escape(shortcut)
+            pattern = r"^%s\s+" % re.escape(shortcut)
             matches = re.match(pattern, line)
             if matches:
                 start, end = matches.span()
@@ -261,7 +270,7 @@ class Monitor(cmd.Cmd):
         def putc(address, value):
             try:
                 self.stdout.write(chr(value))
-            except UnicodeEncodeError: # Python 3
+            except UnicodeEncodeError:  # Python 3
                 self.stdout.write("?")
             self.stdout.flush()
 
@@ -313,9 +322,9 @@ class Monitor(cmd.Cmd):
         def available_mpus():
             mpus = list(self.Microprocessors.keys())
             mpus.sort()
-            self._output("Available MPUs: %s" % ', '.join(mpus))
+            self._output("Available MPUs: %s" % ", ".join(mpus))
 
-        if args == '':
+        if args == "":
             self._output("Current MPU is %s" % self._mpu.name)
             available_mpus()
         else:
@@ -324,7 +333,7 @@ class Monitor(cmd.Cmd):
                 self._output("Unknown MPU: %s" % args)
                 available_mpus()
             else:
-                self._reset(new_mpu,self.getc_addr,self.putc_addr)
+                self._reset(new_mpu, self.getc_addr, self.putc_addr)
                 self._output("Reset with new MPU %s" % self._mpu.name)
 
     def help_mpu(self):
@@ -332,7 +341,7 @@ class Monitor(cmd.Cmd):
         self._output("mpu <type>\tSelect a new microprocessor.")
 
     def do_quit(self, args):
-        self._output('')
+        self._output("")
         return 1
 
     def help_quit(self):
@@ -351,36 +360,42 @@ class Monitor(cmd.Cmd):
             self._mpu.memory[start:end] = bytes
             self.do_disassemble(self.addrFmt % start)
         except KeyError as exc:
-            self._output(exc.args[0]) # "Label not found: foo"
+            self._output(exc.args[0])  # "Label not found: foo"
         except OverflowError:
             self._output("Overflow error: %s" % args)
         except SyntaxError:
             self._output("Syntax error: %s" % statement)
 
     def help_assemble(self):
-        self._output("assemble\t\t\t"
-                     "Start interactive assembly at the program counter.")
-        self._output("assemble <address>\t\t"
-                     "Start interactive assembly at the address.")
-        self._output("assemble <address> <statement>\t"
-                     "Assemble a statement at the address.")
+        self._output(
+            "assemble\t\t\t" "Start interactive assembly at the program counter."
+        )
+        self._output(
+            "assemble <address>\t\t" "Start interactive assembly at the address."
+        )
+        self._output(
+            "assemble <address> <statement>\t" "Assemble a statement at the address."
+        )
 
     def _interactive_assemble(self, args):
-        if args == '':
+        if args == "":
             start = self._mpu.pc
         else:
             try:
                 start = self._address_parser.number(args)
             except KeyError as exc:
-                self._output(exc.args[0]) # "Label not found: foo"
+                self._output(exc.args[0])  # "Label not found: foo"
                 return
 
         while True:
-            prompt = "\r$" + (self.addrFmt % start) + "   " + \
-                (" " * int(1 + self.byteWidth / 4) * 3)
+            prompt = (
+                "\r$"
+                + (self.addrFmt % start)
+                + "   "
+                + (" " * int(1 + self.byteWidth / 4) * 3)
+            )
 
-            line = console.line_input(prompt,
-                                      stdin=self.stdin, stdout=self.stdout)
+            line = console.line_input(prompt, stdin=self.stdin, stdout=self.stdout)
 
             if not line.strip():
                 self.stdout.write("\n")
@@ -397,13 +412,13 @@ class Monitor(cmd.Cmd):
                 # print disassembly
                 _, disasm = self._disassembler.instruction_at(start)
                 fdisasm = self._format_disassembly(start, numbytes, disasm)
-                indent = ' ' * (len(prompt + line) + 5)
+                indent = " " * (len(prompt + line) + 5)
                 self.stdout.write("\r" + indent + "\r")
                 self.stdout.write(fdisasm + "\n")
 
                 # advance to next address
                 start += numbytes
-                if start >= (2 ** self._mpu.ADDR_WIDTH):
+                if start >= (2**self._mpu.ADDR_WIDTH):
                     start = 0
             except KeyError:
                 addr = self.addrFmt % start
@@ -427,7 +442,7 @@ class Monitor(cmd.Cmd):
         else:
             end = start
 
-        max_address = (2 ** self._mpu.ADDR_WIDTH) - 1
+        max_address = (2**self._mpu.ADDR_WIDTH) - 1
         cur_address = start
         needs_wrap = start > end
 
@@ -445,10 +460,10 @@ class Monitor(cmd.Cmd):
 
     def _format_disassembly(self, address, length, disasm):
         cur_address = address
-        max_address = (2 ** self._mpu.ADDR_WIDTH) - 1
+        max_address = (2**self._mpu.ADDR_WIDTH) - 1
 
         bytes_remaining = length
-        dump = ''
+        dump = ""
 
         while bytes_remaining:
             if cur_address > max_address:
@@ -488,7 +503,7 @@ class Monitor(cmd.Cmd):
         self._output("Change the PC to address and continue execution.")
 
     def do_goto(self, args):
-        if args == '':
+        if args == "":
             return self.help_goto()
 
         self._mpu.pc = self._address_parser.number(args)
@@ -536,9 +551,9 @@ class Monitor(cmd.Cmd):
         self._output(str(self._mpu.processorCycles))
 
     def do_radix(self, args):
-        radixes = {'Hexadecimal': 16, 'Decimal': 10, 'Octal': 8, 'Binary': 2}
+        radixes = {"Hexadecimal": 16, "Decimal": 10, "Octal": 8, "Binary": 2}
 
-        if args != '':
+        if args != "":
             new = args[0].lower()
             changed = False
             for name, radix in radixes.items():
@@ -557,7 +572,7 @@ class Monitor(cmd.Cmd):
         self._output("Display a number in decimal, hex, octal, and binary.")
 
     def do_tilde(self, args):
-        if args == '':
+        if args == "":
             return self.help_tilde()
 
         try:
@@ -577,28 +592,28 @@ class Monitor(cmd.Cmd):
         self._output("display register values.")
 
     def do_registers(self, args):
-        if args == '':
+        if args == "":
             return
 
-        pairs = re.findall(r'([^=,\s]*)=([^=,\s]*)', args)
+        pairs = re.findall(r"([^=,\s]*)=([^=,\s]*)", args)
         if pairs == []:
             return self._output("Syntax error: %s" % args)
 
         for register, value in pairs:
-            if register not in ('pc', 'sp', 'a', 'x', 'y', 'p'):
+            if register not in ("pc", "sp", "a", "x", "y", "p"):
                 self._output("Invalid register: %s" % register)
             else:
                 try:
                     intval = self._address_parser.number(value)
-                except KeyError as exc: # label not found
+                except KeyError as exc:  # label not found
                     self._output(exc.args[0])
                     continue
-                except OverflowError as exc: # wider than address space
+                except OverflowError as exc:  # wider than address space
                     msg = "Overflow: %r too wide for register %r"
                     self._output(msg % (value, register))
                     continue
 
-                if register != 'pc':
+                if register != "pc":
                     if intval != (intval & self.byteMask):
                         msg = "Overflow: %r too wide for register %r"
                         self._output(msg % (value, register))
@@ -611,14 +626,13 @@ class Monitor(cmd.Cmd):
         self._output("Change the working directory.")
 
     def do_cd(self, args):
-        if args == '':
+        if args == "":
             return self.help_cd()
 
         try:
             os.chdir(args)
         except OSError as exc:
-            msg = "Cannot change directory: [%d] %s" % (exc.errno,
-                exc.strerror)
+            msg = "Cannot change directory: [%d] %s" % (exc.errno, exc.strerror)
             self._output(msg)
         self.do_pwd()
 
@@ -654,7 +668,7 @@ class Monitor(cmd.Cmd):
                 return
         else:
             try:
-                f = open(filename, 'rb')
+                f = open(filename, "rb")
                 bytes = f.read()
                 f.close()
             except (OSError, IOError) as exc:
@@ -676,21 +690,23 @@ class Monitor(cmd.Cmd):
         if self.byteWidth == 8:
             if isinstance(bytes, str):
                 bytes = map(ord, bytes)
-            else: # Python 3
-                bytes = [ b for b in bytes ]
+            else:  # Python 3
+                bytes = [b for b in bytes]
 
         elif self.byteWidth == 16:
+
             def format(msb, lsb):
                 if isinstance(bytes, str):
                     return (ord(msb) << 8) + ord(lsb)
-                else: # Python 3
+                else:  # Python 3
                     return (msb << 8) + lsb
+
             bytes = list(map(format, bytes[0::2], bytes[1::2]))
 
         self._fill(start, start, bytes)
 
     def help_save(self):
-        self._output("save \"filename\" <start> <end>")
+        self._output('save "filename" <start> <end>')
         self._output("Save the specified memory range as a binary file.")
         self._output("Commodore-style load address bytes are not written.")
 
@@ -704,13 +720,13 @@ class Monitor(cmd.Cmd):
         start = self._address_parser.number(split[1])
         end = self._address_parser.number(split[2])
 
-        mem = self._mpu.memory[start:end + 1]
+        mem = self._mpu.memory[start : end + 1]
         try:
-            f = open(filename, 'wb')
+            f = open(filename, "wb")
             for m in mem:
                 # output each octect from msb first
                 for shift in range(self.byteWidth - 8, -1, -8):
-                    f.write(bytearray([(m >> shift) & 0xff]))
+                    f.write(bytearray([(m >> shift) & 0xFF]))
             f.close()
         except (OSError, IOError) as exc:
             msg = "Cannot save file: [%d] %s" % (exc.errno, exc.strerror)
@@ -754,12 +770,12 @@ class Monitor(cmd.Cmd):
 
         if start == end:
             end = start + length - 1
-            if (end > self.addrMask):
+            if end > self.addrMask:
                 end = self.addrMask
 
         while address <= end:
             address &= self.addrMask
-            self._mpu.memory[address] = (filler[index] & self.byteMask)
+            self._mpu.memory[address] = filler[index] & self.byteMask
             index += 1
             if index == length:
                 index = 0
@@ -806,7 +822,7 @@ class Monitor(cmd.Cmd):
         try:
             address = self._address_parser.number(split[0])
         except KeyError as exc:
-            self._output(exc.args[0]) # "Label not found: foo"
+            self._output(exc.args[0])  # "Label not found: foo"
         except OverflowError:
             self._output("Overflow error: %s" % args)
         else:
@@ -831,14 +847,14 @@ class Monitor(cmd.Cmd):
         self._output("Remove the specified label from the label tables.")
 
     def do_delete_label(self, args):
-        if args == '':
+        if args == "":
             return self.help_delete_label()
 
         if args in self._address_parser.labels:
             del self._address_parser.labels[args]
 
     def do_width(self, args):
-        if args != '':
+        if args != "":
             try:
                 new_width = int(args)
                 if new_width >= 10:
@@ -913,21 +929,24 @@ class Monitor(cmd.Cmd):
         self._output("show_breakpoints")
         self._output("Lists the currently assigned breakpoints")
 
+
 def main(args=None):
     c = Monitor()
 
     try:
         import readline
+
         readline = readline  # pyflakes
     except ImportError:
         pass
 
     try:
-        c.onecmd('version')
+        c.onecmd("version")
         c.cmdloop()
     except KeyboardInterrupt:
-        c._output('')
+        c._output("")
         console.restore_mode()
+
 
 if __name__ == "__main__":
     main()

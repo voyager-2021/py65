@@ -6,48 +6,48 @@ if sys.platform[:3] == "win":
     import msvcrt
 
     def get_unbuffered_stdin(stdin):
-        """ get_unbuffered_stdin returns the given stdin on Windows. """
+        """get_unbuffered_stdin returns the given stdin on Windows."""
         return stdin
 
     def save_mode(stdin):
-        """ save_mode is a no-op on Windows. """
+        """save_mode is a no-op on Windows."""
         return
 
     def noncanonical_mode(stdin):
-        """ noncanonical_mode is a no-op on Windows. """
+        """noncanonical_mode is a no-op on Windows."""
         return
 
     def restore_mode():
-        """ restore_mode is a no-op on Windows. """
+        """restore_mode is a no-op on Windows."""
         return
 
     def getch(stdin):
-        """ Read one character from the Windows console, blocking until one
+        """Read one character from the Windows console, blocking until one
         is available.  Does not echo the character.  The stdin argument is
         for function signature compatibility and is ignored.
         """
         return as_string(msvcrt.getch())
 
     def getch_noblock(stdin):
-        """ Read one character from the Windows console without blocking.
+        """Read one character from the Windows console without blocking.
         Does not echo the character.  The stdin argument is for function
         signature compatibility and is ignored.  If no character is
         available, an empty string is returned.
         """
         if msvcrt.kbhit():
             return as_string(getch(stdin))
-        return u''
+        return ""
 
 else:
-    import termios
     import os
+    import termios
     from select import select
 
     oldattr = None
     oldstdin = None
 
     def get_unbuffered_stdin(stdin):
-        """ Attempt to get and return a copy of stdin that is
+        """Attempt to get and return a copy of stdin that is
         unbuffered.  This allows for immediate response to typed input
         as well as pasted input.  If unable to get an unbuffered
         version of stdin, return the original version.
@@ -55,7 +55,7 @@ else:
         if stdin != None:
             try:
                 # Reopen stdin with no buffer.
-                return os.fdopen(os.dup(stdin.fileno()), 'rb', 0)
+                return os.fdopen(os.dup(stdin.fileno()), "rb", 0)
             except Exception as e:
                 print(e)
                 # Unable to reopen this file handle with no buffer.
@@ -65,14 +65,14 @@ else:
             # If stdin is None, try using sys.stdin for input.
             try:
                 # Reopen the system's stdin with no buffer.
-                return os.fdopen(os.dup(sys.stdin.fileno()), 'rb', 0)
+                return os.fdopen(os.dup(sys.stdin.fileno()), "rb", 0)
             except:
                 # If unable to get an unbuffered stdin, just return
                 # None, which is what we started with if we got here.
                 return None
 
     def save_mode(stdin):
-        """ For operating systems that support it, save the original
+        """For operating systems that support it, save the original
         input termios settings so they can be restored later.  This
         allows us to switch to noncanonical mode when software is
         running in the simulator and back to the original mode when
@@ -142,19 +142,19 @@ else:
             pass
 
     def getch(stdin):
-        """ Read one character from stdin, blocking until one is available.
+        """Read one character from stdin, blocking until one is available.
         Does not echo the character.
         """
         # Try to get a character with a non-blocking read.
-        char = ''
+        char = ""
         noncanonical_mode(stdin)
         # If we didn't get a character, ask again.
-        while char == '':
+        while char == "":
             try:
                 # On OSX, calling read when no data is available causes the
                 # file handle to never return any future data, so we need to
                 # use select to make sure there is at least one char to read.
-                rd,wr,er = select([stdin], [], [], 0.01)
+                rd, wr, er = select([stdin], [], [], 0.01)
                 if rd != []:
                     char = as_string(stdin.read(1))
             except KeyboardInterrupt:
@@ -165,10 +165,10 @@ else:
         return char
 
     def getch_noblock(stdin):
-        """ Read one character from stdin without blocking.  Does not echo the
+        """Read one character from stdin without blocking.  Does not echo the
         character.  If no character is available, an empty string is returned.
         """
-        char = ''
+        char = ""
 
         # Using non-blocking read
         noncanonical_mode(stdin)
@@ -177,7 +177,7 @@ else:
             # On OSX, calling read when no data is available causes the
             # file handle to never return any future data, so we need to
             # use select to make sure there is at least one char to read.
-            rd,wr,er = select([stdin], [], [], 0.01)
+            rd, wr, er = select([stdin], [], [], 0.01)
             if rd != []:
                 char = as_string(stdin.read(1))
         except KeyboardInterrupt:
@@ -188,31 +188,32 @@ else:
 
         # Convert linefeeds to carriage returns.
         if len(char) and ord(char) == 10:
-            char = '\r'
+            char = "\r"
         return char
 
 
-def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
-    """ Read a line from stdin, printing each character as it is typed.
+def line_input(prompt="", stdin=sys.stdin, stdout=sys.stdout):
+    """Read a line from stdin, printing each character as it is typed.
     Does not echo a newline at the end.  This allows the calling program
     to overwrite the line by first sending a carriage return ('\r'), which
     is useful in modes like the interactive assembler.
     """
     stdout.write(prompt)
     stdout.flush()
-    line = ''
+    line = ""
     while True:
         char = getch(stdin)
         code = ord(char)
         if char in ("\n", "\r"):
             break
-        elif code in (0x7f, 0x08):  # backspace
+        elif code in (0x7F, 0x08):  # backspace
             if len(line) > 0:
                 line = line[:-1]
-                stdout.write("\r%s\r%s%s" %
-                             (' ' * (len(prompt + line) + 5), prompt, line))
+                stdout.write(
+                    "\r%s\r%s%s" % (" " * (len(prompt + line) + 5), prompt, line)
+                )
                 stdout.flush()
-        elif code == 0x1b:  # escape
+        elif code == 0x1B:  # escape
             pass
         else:
             line += char

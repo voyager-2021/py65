@@ -5,7 +5,7 @@ from py65.utils.devices import make_instruction_decorator
 class MPU(mpu6502.MPU):
     def __init__(self, *args, **kwargs):
         mpu6502.MPU.__init__(self, *args, **kwargs)
-        self.name = '65C02'
+        self.name = "65C02"
         self.waiting = False
 
     def step(self):
@@ -21,8 +21,9 @@ class MPU(mpu6502.MPU):
     extracycles = mpu6502.MPU.extracycles[:]
     disassemble = mpu6502.MPU.disassemble[:]
 
-    instruction = make_instruction_decorator(instruct, disassemble,
-                                             cycletime, extracycles)
+    instruction = make_instruction_decorator(
+        instruct, disassemble, cycletime, extracycles
+    )
 
     # addressing modes
 
@@ -265,11 +266,11 @@ class MPU(mpu6502.MPU):
         self.opSMB(self.ZeroPageAddr, 0x10)
         self.pc += 1
 
-    @instruction(name="WAI", mode='imp', cycles=3)
+    @instruction(name="WAI", mode="imp", cycles=3)
     def inst_0xcb(self):
         self.waiting = True
 
-    @instruction(name="CMP", mode='zpi', cycles=5)
+    @instruction(name="CMP", mode="zpi", cycles=5)
     def inst_0xd2(self):
         self.opCMPR(self.ZeroPageIndirectAddr, self.a)
         self.pc += 1

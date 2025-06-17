@@ -17,75 +17,82 @@ class Disassembler:
         self.byteMask = mpu.byteMask
 
     def instruction_at(self, pc):
-        """ Disassemble the instruction at PC and return a tuple
+        """Disassemble the instruction at PC and return a tuple
         containing (instruction byte count, human readable text)
         """
 
         instruction = self._mpu.ByteAt(pc)
         disasm, addressing = self._mpu.disassemble[instruction]
 
-        if addressing == 'acc':
-            disasm += ' A'
+        if addressing == "acc":
+            disasm += " A"
             length = 1
 
-        elif addressing == 'abs':
+        elif addressing == "abs":
             address = self._mpu.WordAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                address, '$' + self.addrFmt % address)
-            disasm += ' ' + address_or_label
+                address, "$" + self.addrFmt % address
+            )
+            disasm += " " + address_or_label
             length = 3
 
-        elif addressing == 'abx':
+        elif addressing == "abx":
             address = self._mpu.WordAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                address, '$' + self.addrFmt % address)
-            disasm += ' %s,X' % address_or_label
+                address, "$" + self.addrFmt % address
+            )
+            disasm += " %s,X" % address_or_label
             length = 3
 
-        elif addressing == 'aby':
+        elif addressing == "aby":
             address = self._mpu.WordAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                address, '$' + self.addrFmt % address)
-            disasm += ' %s,Y' % address_or_label
+                address, "$" + self.addrFmt % address
+            )
+            disasm += " %s,Y" % address_or_label
             length = 3
 
-        elif addressing == 'imm':
+        elif addressing == "imm":
             byte = self._mpu.ByteAt(pc + 1)
-            disasm += ' #$' + self.byteFmt % byte
+            disasm += " #$" + self.byteFmt % byte
             length = 2
 
-        elif addressing == 'imp':
+        elif addressing == "imp":
             length = 1
 
-        elif addressing == 'ind':
+        elif addressing == "ind":
             address = self._mpu.WordAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                address, '$' + self.addrFmt % address)
-            disasm += ' (%s)' % address_or_label
+                address, "$" + self.addrFmt % address
+            )
+            disasm += " (%s)" % address_or_label
             length = 3
 
-        elif addressing == 'iny':
+        elif addressing == "iny":
             zp_address = self._mpu.ByteAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                zp_address, '$' + self.byteFmt % zp_address)
-            disasm += ' (%s),Y' % address_or_label
+                zp_address, "$" + self.byteFmt % zp_address
+            )
+            disasm += " (%s),Y" % address_or_label
             length = 2
 
-        elif addressing == 'inx':
+        elif addressing == "inx":
             zp_address = self._mpu.ByteAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                zp_address, '$' + self.byteFmt % zp_address)
-            disasm += ' (%s,X)' % address_or_label
+                zp_address, "$" + self.byteFmt % zp_address
+            )
+            disasm += " (%s,X)" % address_or_label
             length = 2
 
-        elif addressing == 'iax':
+        elif addressing == "iax":
             address = self._mpu.WordAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                address, '$' + self.addrFmt % address)
-            disasm += ' (%s,X)' % address_or_label
+                address, "$" + self.addrFmt % address
+            )
+            disasm += " (%s,X)" % address_or_label
             length = 3
 
-        elif addressing == 'rel':
+        elif addressing == "rel":
             opv = self._mpu.ByteAt(pc + 1)
             targ = pc + 2
             if opv & (1 << (self.byteWidth - 1)):
@@ -95,36 +102,41 @@ class Disassembler:
             targ &= self.addrMask
 
             address_or_label = self._address_parser.label_for(
-                targ, '$' + self.addrFmt % targ)
-            disasm += ' ' + address_or_label
+                targ, "$" + self.addrFmt % targ
+            )
+            disasm += " " + address_or_label
             length = 2
 
-        elif addressing == 'zpi':
+        elif addressing == "zpi":
             zp_address = self._mpu.ByteAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                zp_address, '$' + self.byteFmt % zp_address)
-            disasm += ' (%s)' % address_or_label
+                zp_address, "$" + self.byteFmt % zp_address
+            )
+            disasm += " (%s)" % address_or_label
             length = 2
 
-        elif addressing == 'zpg':
+        elif addressing == "zpg":
             zp_address = self._mpu.ByteAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                zp_address, '$' + self.byteFmt % zp_address)
-            disasm += ' %s' % address_or_label
+                zp_address, "$" + self.byteFmt % zp_address
+            )
+            disasm += " %s" % address_or_label
             length = 2
 
-        elif addressing == 'zpx':
+        elif addressing == "zpx":
             zp_address = self._mpu.ByteAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                zp_address, '$' + self.byteFmt % zp_address)
-            disasm += ' %s,X' % address_or_label
+                zp_address, "$" + self.byteFmt % zp_address
+            )
+            disasm += " %s,X" % address_or_label
             length = 2
 
-        elif addressing == 'zpy':
+        elif addressing == "zpy":
             zp_address = self._mpu.ByteAt(pc + 1)
             address_or_label = self._address_parser.label_for(
-                zp_address, '$' + self.byteFmt % zp_address)
-            disasm += ' %s,Y' % address_or_label
+                zp_address, "$" + self.byteFmt % zp_address
+            )
+            disasm += " %s,Y" % address_or_label
             length = 2
 
         else:

@@ -1,34 +1,33 @@
-import sys
-import unittest
-from py65.utils.conversions import itoa, convert_to_bin, convert_to_bcd
+import pytest
+
+from py65.utils.conversions import convert_to_bcd, convert_to_bin, itoa
 
 
-class ConversionsTopLevelTests(unittest.TestCase):
-    def test_itoa_decimal_output(self):
-        self.assertEqual('10', itoa(10, base=10))
-        self.assertEqual('-10', itoa(-10, base=10))
+def test_itoa_decimal_output():
+    assert "10" == itoa(10, base=10)
+    assert "-10" == itoa(-10, base=10)
 
-    def test_itoa_hex_output(self):
-        self.assertEqual('a', itoa(10, base=16))
-        self.assertEqual('-a', itoa(-10, base=16))
 
-    def test_itoa_bin_output(self):
-        self.assertEqual('1010', itoa(10, base=2))
-        self.assertEqual('-1010', itoa(-10, base=2))
+def test_itoa_hex_output():
+    assert "a" == itoa(10, base=16)
+    assert "-a" == itoa(-10, base=16)
 
-    def test_itoa_unsupported_base(self):
-        self.assertRaises(ValueError, itoa, 0, base=17)
 
-    def test_convert_to_bin(self):
-        self.assertEqual(0, convert_to_bin(0))
-        self.assertEqual(99, convert_to_bin(0x99))
+def test_itoa_bin_output():
+    assert "1010" == itoa(10, base=2)
+    assert "-1010" == itoa(-10, base=2)
 
-    def test_convert_to_bcd(self):
-        self.assertEqual(0, convert_to_bcd(0))
-        self.assertEqual(0x99, convert_to_bcd(99))
 
-def test_suite():
-    return unittest.findTestCases(sys.modules[__name__])
+def test_itoa_unsupported_base():
+    with pytest.raises(ValueError):
+        itoa(0, base=17)
 
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+
+def test_convert_to_bin():
+    assert 0 == convert_to_bin(0)
+    assert 99 == convert_to_bin(0x99)
+
+
+def test_convert_to_bcd():
+    assert 0 == convert_to_bcd(0)
+    assert 0x99 == convert_to_bcd(99)
