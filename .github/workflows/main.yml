@@ -11,8 +11,8 @@ env:
             pip --no-cache-dir"
 
 jobs:
-  tests_py27:
-    runs-on: ubuntu-20.04
+  build_py27:
+    runs-on: ubuntu-latest
     container: python:2.7
     strategy:
       fail-fast: false
@@ -33,7 +33,7 @@ jobs:
       run: END_TO_END=1 python setup.py test -q
 
   build_py34:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container: python:3.4
     strategy:
       fail-fast: false
@@ -59,7 +59,7 @@ jobs:
       run: END_TO_END=1 python setup.py test -q
 
   build_py35:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container: python:3.5
     strategy:
       fail-fast: false
@@ -83,8 +83,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, "3.10", 3.11, 3.12]
-        os: [ubuntu-20.04]
+        python-version: [3.6, 3.7, 3.8, 3.9, "3.10", 3.11, 3.12, 3.13, 3.14]
+        os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
 
